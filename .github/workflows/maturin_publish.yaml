@@ -458,8 +458,34 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           pattern: wheels-*
-          path: dist
-          merge-multiple: true
+          path: artifacts
+
+      - name: Assemble distributions
+        run: |
+          python - <<'PY'
+          from collections import defaultdict
+          from pathlib import Path
+          import shutil
+
+          artifacts_dir = Path("artifacts")
+          dist_dir = Path("dist")
+          dist_dir.mkdir()
+
+          distributions_by_filename = defaultdict(list)
+          for path in sorted(artifacts_dir.rglob("*")):
+              if path.is_file():
+                  distributions_by_filename[path.name].append(path)
+
+          def is_dedicated_abi3_build(path):
+              return "-abi3-py" in path.parent.name
+
+          for filename, candidates in distributions_by_filename.items():
+              chosen = next((p for p in candidates if is_dedicated_abi3_build(p)), candidates[0])
+              for skipped in candidates:
+                  if skipped is not chosen:
+                      print(f"Duplicate {filename}: keeping {chosen} over {skipped}")
+              shutil.copyfile(chosen, dist_dir / filename)
+          PY
 
       - name: Generate artifact attestation
         uses: actions/attest@v4
