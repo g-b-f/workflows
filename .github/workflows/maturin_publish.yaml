@@ -1,5 +1,18 @@
 name: Reusable Maturin Publish
 
+# Reusable workflow for publishing a maturin job.
+
+# This workflow makes the following assumptions:
+# - Repository has `secrets.PYPI_API_TOKEN` set
+# - The package is a Maturin/PyO3 project with `Cargo.toml` in the repo root
+# - `Cargo.toml` has `package.version` that must match a pushed `v*` tag
+# - Tests live in the directory passed via `tests-directory` (default `tests`) and are run with `uv run pytest`
+# - The Python package import/install name equals the `package-name` input
+# - The smoke test script passed in `smoke-test-script` is valid Python code
+# - The environment has network access to PyPI and uses `uv publish`
+# - The caller job grants `id-token: write`, `contents: write`, and `attestations: write` permissions
+# - Artifact names use the `wheels-*` prefix for the release job to collect them
+
 on:
   workflow_call:
     inputs:
