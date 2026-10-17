@@ -52,12 +52,12 @@ on:
       build-graalpy:
         required: false
         type: boolean
-        default: true
+        default: false
         description: 'Whether to build and publish GraalPy wheels'
       build-pypy:
         required: false
         type: boolean
-        default: true
+        default: false
         description: 'Whether to build and publish PyPy wheels'
 
     secrets:
